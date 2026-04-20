@@ -1,22 +1,6 @@
 streamlit
-    pandas
-    scikit-learn
-    plotly
-    fpdf2
-    joblib
-    
-  
-  
-    Since you are already in VS Code, you can do this without typing commands:
-    1. Click the **Source Control** icon on the far left menu (it looks like a branch with 3 nodes).
-    2. Click the **Publish to GitHub** button.
-    3. Choose **Publish to GitHub public repository** (this is important so recruiters can see it).
-    4. Select the files to include: make sure `app.py`, `advanced_student_data.csv`, `rf_advanced_model.pkl`, and `requirements.txt` are all checked. 
-    5. Hit OK. VS Code will upload everything to your GitHub account automatically.
-  
-  
-    1. Go to [share.streamlit.io](https://share.streamlit.io/) and log in with your GitHub account.
-    2. Click the blue **"New app"** button.
-    3. You will see a dropdown to select a repository. Find the one you just created (e.g., `yourusername/Student.py`).
-    4. Set the **Main file path** to `app.py`.
-    5. Click **Deploy!**
+pandas
+scikit-learn
+plotly
+fpdf2
+joblib
