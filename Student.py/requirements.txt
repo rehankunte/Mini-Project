@@ -4,7 +4,7 @@ streamlit
     plotly
     fpdf2
     joblib
-    Save the file.
+    
   
   
     Since you are already in VS Code, you can do this without typing commands:
