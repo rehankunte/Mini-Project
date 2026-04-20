@@ -10,11 +10,11 @@ st.title("🎓 Student Performance & Advisory Dashboard")
 # 2. Load the saved model and dataset
 @st.cache_resource
 def load_model():
-    return joblib.load('rf_model.pkl')
+    return joblib.load('rf_advanced_model.pkl')
 
 @st.cache_data
 def load_data():
-    return pd.read_csv('student_performance_data.csv')
+    return pd.read_csv('advanced_student_data.csv')
 
 model = load_model()
 df = load_data()
