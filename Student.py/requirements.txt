@@ -4,7 +4,6 @@ streamlit
     plotly
     fpdf2
     joblib
-    ```
     Save the file.
   
   
