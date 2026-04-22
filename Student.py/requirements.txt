@@ -4,3 +4,4 @@ scikit-learn
 plotly
 fpdf2
 joblib
+statsmodels
