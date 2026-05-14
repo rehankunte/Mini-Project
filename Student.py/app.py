@@ -105,23 +105,42 @@ with tab_predict:
 
         # The Advice Engine
         # --- THE ADVICE ENGINE ---
+        
+        # --- 4. DYNAMIC ADVICE ENGINE ---
         failures_for_pdf = []
         if prediction in ["Slow", "Average"]:
             st.subheader("💡 Your Personalized Action Plan")
             
             if attendance < benchmarks['attendance']:
-                msg = f"Attendance Alert ({attendance}% vs Top Average {benchmarks['attendance']:.1f}%): Missing lectures creates a compounding knowledge gap, as professors frequently drop hints about external exams during live sessions. Make a strict rule to attend all core lectures, and try sitting in the first three rows to force active engagement. Building a habit of showing up also connects you with high-performing peers who can help when concepts get tough."
-                st.error(msg)
+                shortfall = int(benchmarks['attendance'] - attendance)
+                att_tips = [
+                    f"Attendance Alert: You are {shortfall}% below the top-tier average. Missing lectures creates compounding knowledge gaps. Try sitting in the first three rows to force active engagement.",
+                    f"Action Required: Top students maintain {benchmarks['attendance']:.1f}% attendance. Skipping classes means missing unofficial hints professors drop about the final exam. Make a strict rule to attend all core lectures.",
+                    f"Consistency Check: You need to boost attendance by {shortfall}% to match fast learners. Building a habit of showing up connects you with high-performing peers who can help when concepts get tough."
+                ]
+                msg = random.choice(att_tips)
+                st.error(f"**📉 {msg}**")
                 failures_for_pdf.append(msg)
                 
             if study < benchmarks['study']:
-                msg = f"Study Volume Alert ({study} hrs vs Top Average {benchmarks['study']:.1f} hrs): Your current self-study time isn't quite enough to master complex concepts. To increase this without burning out, implement the Pomodoro Technique: work in highly focused 25-minute sprints followed by a 5-minute break. During these sprints, prioritize active recall and practice problems instead of just passively highlighting your textbook."
-                st.error(msg)
+                gap = round(benchmarks['study'] - study, 1)
+                study_tips = [
+                    f"Study Volume: You are studying {gap} hours less than the benchmark. Implement the Pomodoro Technique: work in highly focused 25-minute sprints followed by a 5-minute break.",
+                    f"Study Strategy: Your self-study time is at {study} hrs. To reach the {benchmarks['study']:.1f} hr average without burning out, prioritize active recall and practice problems instead of passive reading.",
+                    f"Time Management: Increase your daily study by {gap} hours. Break this down into two smaller blocks—one in the morning and one at night—focusing entirely on past exam papers."
+                ]
+                msg = random.choice(study_tips)
+                st.error(f"**📉 {msg}**")
                 failures_for_pdf.append(msg)
                 
             if submission < benchmarks['submission']:
-                msg = f"Submission Consistency Alert ({submission}% vs Top Average {benchmarks['submission']:.1f}%): Skipping assignments leaves easy internal marks on the table and drastically lowers your baseline grade. Stop viewing assignments as massive hurdles; break them down into 15-minute micro-tasks the very day they are assigned. Consistently submitting work, even if it isn't completely perfect, builds a buffer that protects your overall GPA if you stumble on a main exam."
-                st.error(msg)
+                sub_tips = [
+                    f"Submission Consistency: You are leaving easy internal marks on the table. Break assignments down into 15-minute micro-tasks the very day they are assigned.",
+                    f"Internal Marks Alert: Top students submit {benchmarks['submission']:.1f}% of work. Consistently submitting work, even if imperfect, builds a buffer that protects your overall GPA.",
+                    f"Workflow Optimization: Stop viewing assignments as massive hurdles. Start the first draft within 24 hours of receiving the prompt to avoid last-minute panic."
+                ]
+                msg = random.choice(sub_tips)
+                st.error(f"**📉 {msg}**")
                 failures_for_pdf.append(msg)
 
         # PDF Download Button
