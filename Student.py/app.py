@@ -3,7 +3,9 @@ import pandas as pd
 import joblib
 import plotly.express as px
 import numpy as np
+import random  # <--- Add this line right here!
 from fpdf import FPDF
+from database import SessionLocal, PredictionLog
 
 st.set_page_config(page_title="Student Performance Dashboard", layout="wide")
 st.title("🎓 Student Performance & Advisory Dashboard")
@@ -25,7 +27,7 @@ fast_students = df[df['Performance_Tier'] == 'Fast']
 benchmarks = {
     'attendance': fast_students['Attendance_%'].mean(),
     'study': fast_students['Study_Hours_Per_Day'].mean(),
-    'submission': fast_students['Assignment_Submission_%'].mean() if 'Assignment_Submission_%' in df.columns else fast_students.iloc[:, 3].mean() 
+    'submission': fast_students['Assignment_Submission_Rate_%'].mean()
 }
 
 # --- 2. PDF GENERATION LOGIC ---
@@ -57,8 +59,12 @@ def create_report_card(inputs, prediction, failures):
     else:
         pdf.cell(0, 6, "   ATTENTION REQUIRED. Focus on the following gaps:", ln=True)
         for fail in failures:
-            pdf.cell(0, 6, f"   * {fail}", ln=True)
+            # Swap out the unsupported em-dash for a standard hyphen
+            safe_fail = fail.replace("—", "-")
             
+            # Using multi_cell instead of cell so long text wraps properly!
+            pdf.multi_cell(0, 6, f"   * {safe_fail}")
+            pdf.ln(2)
     return bytes(pdf.output())
 
 # --- 3. DASHBOARD TABS ---
@@ -90,10 +96,29 @@ with tab_predict:
         
         # Ensure column names match the model exactly by using the dataframe's columns
         input_data = pd.DataFrame([input_dict])
-        if 'Assignment_Submission_%' in df.columns:
-             input_data.rename(columns={'Assignment_Submission_Rate_%': 'Assignment_Submission_%'}, inplace=True)
-
+      
         prediction = model.predict(input_data)[0]
+        prediction = model.predict(input_data)[0]
+        
+        # --- NEW: SAVE TO SQL DATABASE ---
+        try:
+            db = SessionLocal()
+            new_log = PredictionLog(
+                exam_score=int(exam),
+                attendance=int(attendance),
+                submission=int(submission),
+                study_hours=float(study),
+                cgpa=float(cgpa),
+                extracurricular=extra_val,
+                predicted_tier=prediction
+            )
+            db.add(new_log)
+            db.commit()
+            db.close()
+            st.toast("✅ Prediction successfully logged to secure SQL database.")
+        except Exception as e:
+            st.error(f"Database error: {e}")
+
         
         st.markdown("---")
         if prediction == "Fast":
@@ -223,5 +248,37 @@ with tab_eda:
         st.code(stem_leaf_output, language="text")
 
 with tab_data:
-    st.header("System Database")
-    st.dataframe(df, use_container_width=True)
+   with tab_data:
+    st.header("📋 System Database")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Training Dataset")
+        st.dataframe(df, use_container_width=True)
+    
+    with col2:
+        st.subheader("Prediction Logs (SQL)")
+        try:
+            db = SessionLocal()
+            logs = db.query(PredictionLog).order_by(
+                PredictionLog.timestamp.desc()
+            ).limit(50).all()
+            db.close()
+            
+            if logs:
+                log_data = [{
+                    "Time": l.timestamp.strftime("%d-%b %H:%M"),
+                    "Exam": l.exam_score,
+                    "Attendance": l.attendance,
+                    "Submission": l.submission,
+                    "Study Hrs": l.study_hours,
+                    "CGPA": l.cgpa,
+                    "Extra": "Yes" if l.extracurricular else "No",
+                    "Tier": l.predicted_tier
+                } for l in logs]
+                st.dataframe(log_data, use_container_width=True)
+            else:
+                st.info("No predictions logged yet. Use the Classify tab first.")
+        except Exception as e:
+            st.error(f"Could not load logs: {e}")

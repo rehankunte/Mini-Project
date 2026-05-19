@@ -1,7 +1,8 @@
 streamlit
 pandas
 scikit-learn
-plotly
-fpdf2
 joblib
-statsmodels
+plotly
+numpy
+fpdf2
+sqlalchemy
