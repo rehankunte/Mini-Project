@@ -24,7 +24,7 @@ df = load_data()
 
 # Calculate "Fast Learner" benchmarks for the Advice Engine
 fast_students = df[df['Performance_Tier'] == 'Fast']
-submission_col = 'Assignment_Submission_Rate_%' if 'Assignment_Submission_Rate_%' in df.columns else 'Assignment_Submission_%'
+submission_col = 'Assignment_Submission_%' if 'Assignment_Submission_%' in df.columns else 'Assignment_Submission_%'
 
 benchmarks = {
     'attendance': fast_students['Attendance_%'].mean(),
@@ -91,22 +91,18 @@ with tab_predict:
     if submitted:
         extra_val = 1 if extra == "Yes" else 0
         input_dict = {
-    'Exam_Score':             exam,
-    'Attendance_%':           attendance,
-    submission_col:           submission,   # uses the detected column name
-    'Study_Hours_Per_Day':    study,
-    'Previous_CGPA':          cgpa,
-    'Extracurricular_Activities': extra_val
-}
+            'Exam_Score': exam,
+            'Attendance_%': attendance,
+            submission_col: submission,
+            'Study_Hours_Per_Day': study,
+            'Previous_CGPA': cgpa,
+            'Extracurricular_Activities': extra_val
+        }
 
-input_data = pd.DataFrame([input_dict])
-        # Ensure column names match the model exactly by using the dataframe's columns
-input_data = pd.DataFrame([input_dict])
-      
-prediction = model.predict(input_data)[0]
+        input_data = pd.DataFrame([input_dict])
         prediction = model.predict(input_data)[0]
-        
-        # --- NEW: SAVE TO SQL DATABASE ---
+
+        # --- SAVE TO SQL DATABASE ---
         try:
             db = SessionLocal()
             new_log = PredictionLog(
@@ -124,8 +120,6 @@ prediction = model.predict(input_data)[0]
             st.toast("✅ Prediction successfully logged to secure SQL database.")
         except Exception as e:
             st.error(f"Database error: {e}")
-
-        
         st.markdown("---")
         if prediction == "Fast":
             st.success(f"### Predicted Tier: {prediction} Learner 🚀\nKeep up the excellent work!")
